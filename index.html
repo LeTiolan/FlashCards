@@ -83,14 +83,24 @@
   if(localStorage.myDeck && JSON.parse(localStorage.myDeck).length) { deck = JSON.parse(localStorage.myDeck); $('#btn-resume').style.display = 'block'; }
   $('#btn-resume').onclick = () => showCard();
 
+const API_KEY = 'PASTE_YOUR_KEY_HERE'; // <--- Put your free Merriam-Webster key inside these quotes
+
   $('#btn-fetch').onclick = async () => {
     let ws = [...new Set($('#words').value.split(/,|\n/).map(w => w.trim()).filter(w => w))];
     if(!ws.length) return alert('Enter words');
     $('#btn-fetch').disabled = true; $('#msg').innerText = 'Fetching...'; deck = [];
+    
     for(let w of ws) {
-      try { let r = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${w}`), d = await r.json();
-        deck.push({ w, d: r.ok ? d[0].meanings[0].definitions[0].definition : 'Not found' });
-      } catch { deck.push({ w, d: 'Error' }); }
+      try { 
+        let r = await fetch(`https://www.dictionaryapi.com/api/v3/references/collegiate/json/${w}?key=${API_KEY}`);
+        let d = await r.json();
+        
+        // MW returns an object with "shortdef" if found. If misspelled, it returns plain text suggestions.
+        let def = (d.length && d[0].shortdef) ? d[0].shortdef[0] : 'Not found';
+        deck.push({ w, d: def });
+      } catch { 
+        deck.push({ w, d: 'Error' }); 
+      }
     }
     $('#btn-fetch').disabled = false; $('#msg').innerText = ''; showRev();
   };
