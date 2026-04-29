@@ -3,90 +3,164 @@
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Study App</title>
 <style>
-  :root { --p: #4F46E5; --bg: #F3F4F6; --txt: #1F2937; --cbg: #FFF; }
-  body { font-family: system-ui, sans-serif; background: var(--bg); color: var(--txt); display: flex; flex-direction: column; align-items: center; padding: 2rem; margin: 0; min-height: 100vh; }
-  .box { width: 100%; max-width: 600px; background: var(--cbg); padding: 2rem; border-radius: 12px; box-shadow: 0 4px 6px #0002; box-sizing: border-box; }
-  .view { display: none; flex-direction: column; gap: 1rem; text-align: center; }
+  :root { --p: #8B5CF6; --p-hov: #7C3AED; --bg: #FAFAFA; --txt: #52525B; --hdg: #18181B; --cbg: #FFFFFF; --border: #F4F4F5; --shadow: 0 12px 32px -12px rgba(0,0,0,0.08); }
+  body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--txt); display: flex; flex-direction: column; align-items: center; padding: 2rem; margin: 0; min-height: 100vh; }
+  .box { width: 100%; max-width: 600px; background: var(--cbg); padding: 2.5rem; border-radius: 28px; box-shadow: var(--shadow); border: 1px solid #FFF; box-sizing: border-box; }
+  .view { display: none; flex-direction: column; gap: 1.25rem; text-align: center; }
   .active { display: flex; }
-  input, textarea { width: 100%; padding: .75rem; border: 1px solid #D1D5DB; border-radius: 6px; font: inherit; box-sizing: border-box; }
-  button { background: var(--p); color: #FFF; border: none; padding: 1rem; border-radius: 6px; font-size: 1.15rem; font-weight: 600; cursor: pointer; transition: .2s; width: 100%; }
-  button:hover { filter: brightness(1.1); }
-  button:disabled { background: #9CA3AF; cursor: not-allowed; }
+  
+  /* Typography & Inputs */
+  h1 { margin: 0; color: var(--hdg); font-size: 1.8rem; font-weight: 700; letter-spacing: -0.03em; }
+  h2 { margin: 0; font-size: 1.2rem; color: var(--hdg); font-weight: 600; text-align: left; }
+  h3 { margin: 0; font-weight: 500; }
+  input, textarea { width: 100%; padding: 1rem 1.2rem; border: 2px solid transparent; background: var(--border); border-radius: 16px; font: inherit; box-sizing: border-box; transition: all 0.2s ease; outline: none; color: var(--hdg); }
+  input:focus, textarea:focus { border-color: var(--p); background: #FFF; box-shadow: 0 4px 12px rgba(139, 92, 246, 0.1); }
+  
+  /* Buttons */
+  button { background: var(--p); color: #FFF; border: none; padding: 1rem; border-radius: 16px; font-size: 1.05rem; font-weight: 600; cursor: pointer; transition: all 0.2s ease; width: 100%; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+  button:hover:not(:disabled) { background: var(--p-hov); transform: translateY(-2px); box-shadow: 0 8px 20px -6px rgba(139, 92, 246, 0.4); }
+  button:active:not(:disabled) { transform: translateY(0); }
+  button:disabled { background: var(--border); color: #A1A1AA; cursor: not-allowed; box-shadow: none; transform: none; }
   .flex { display: flex; gap: 10px; }
-  .green { background: #10B981 !important; } .red { background: #EF4444 !important; } .gray { background: #6B7280 !important; }
-  h1, h2, h3 { margin: 0; }
+  .green { background: #10B981 !important; } .green:hover { background: #059669 !important; box-shadow: 0 8px 20px -6px rgba(16, 185, 129, 0.4) !important; }
+  .red { background: #F43F5E !important; } .red:hover { background: #E11D48 !important; box-shadow: 0 8px 20px -6px rgba(244, 63, 94, 0.4) !important; }
+  .gray { background: #71717A !important; } .gray:hover { background: #52525B !important; }
   
-  /* Cards */
-  .scene { height: 250px; perspective: 600px; width: 100%; margin: 10px 0; }
-  .card { width: 100%; height: 100%; position: relative; transition: transform .6s; transform-style: preserve-3d; cursor: pointer; }
+  /* Flashcards */
+  .scene { height: 260px; perspective: 1000px; width: 100%; margin: 5px 0; }
+  .card { width: 100%; height: 100%; position: relative; transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); transform-style: preserve-3d; cursor: pointer; }
   .card.flip { transform: rotateX(180deg); }
-  .face { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; display: flex; align-items: center; justify-content: center; padding: 2rem; box-sizing: border-box; border-radius: 12px; box-shadow: 0 4px 6px #0002; font-size: 1.5rem; overflow-y: auto; background: var(--cbg); border: 2px solid var(--p); font-weight: bold; }
-  .back { background: var(--p); color: #FFF; transform: rotateX(180deg); font-weight: normal; font-size: 1.3rem; }
+  .face { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; display: flex; align-items: center; justify-content: center; padding: 2.5rem; box-sizing: border-box; border-radius: 24px; font-size: 1.5rem; overflow-y: auto; background: var(--cbg); border: 2px solid var(--border); box-shadow: var(--shadow); }
+  .face:not(.back) { color: var(--hdg); font-weight: 700; }
+  .back { background: var(--p); color: #FFF; border: none; transform: rotateX(180deg); font-weight: 500; font-size: 1.25rem; line-height: 1.5; }
   
-  /* Quiz & Review */
-  .opt { background: #E5E7EB; color: var(--txt); text-align: left; border: 2px solid transparent; }
-  .opt:hover:not(:disabled) { background: #D1D5DB; }
+  /* Quiz & Library Items */
+  .opt { background: #FFF; color: var(--hdg); text-align: left; border: 2px solid var(--border); font-weight: 500; box-shadow: none; border-radius: 16px; }
+  .opt:hover:not(:disabled) { border-color: var(--p); background: #F5F3FF; color: var(--p); transform: none; box-shadow: none; }
   .opt.c { background: #10B981 !important; color: #FFF; border-color: #059669; } 
-  .opt.w { background: #EF4444 !important; color: #FFF; border-color: #B91C1C; }
-  .rev-row { display: flex; gap: 10px; }
-  .del-btn { width: auto; padding: .75rem 1rem; background: #EF4444; }
+  .opt.w { background: #F43F5E !important; color: #FFF; border-color: #E11D48; }
+  .rev-row { display: flex; gap: 8px; }
+  .del-btn { width: auto; padding: 0.85rem 1.2rem; background: #FFF !important; color: #F43F5E; border: 2px solid #FFE4E6; box-shadow: none; }
+  .del-btn:hover { background: #FFF1F2 !important; border-color: #F43F5E; transform: none !important; }
+  .divider { height: 2px; background: var(--border); margin: 0.5rem 0; border-radius: 2px; }
+
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-thumb { background: #D4D4D8; border-radius: 4px; }
 </style>
 </head>
 <body>
 
   <div id="v-setup" class="box view active">
     <h1>Study App</h1>
-    <textarea id="words" placeholder="Words to learn (comma or newline separated)" rows="4"></textarea>
-    <button id="btn-fetch">Fetch Definitions</button>
-    <button id="btn-resume" class="green" style="display:none">Resume Saved Deck</button>
-    <div id="msg" style="font-weight:600; color:#4B5563"></div>
+    <textarea id="words" placeholder="Paste new words to learn..." rows="3"></textarea>
+    <button id="btn-fetch">Create New Deck</button>
+    <div id="msg" style="font-weight:500; color:#A1A1AA; font-size:0.9rem;"></div>
+    
+    <div class="divider"></div>
+    <h2>Your Library</h2>
+    <div id="deck-list" style="display:flex; flex-direction:column; gap:12px;"></div>
   </div>
 
   <div id="v-rev" class="box view">
-    <h1>Review & Edit</h1>
-    <div id="rev-list" style="max-height:350px; overflow-y:auto; display:flex; flex-direction:column; gap:10px; padding:2px"></div>
-    <button id="btn-add" class="gray">Add Blank Row</button>
-    <button id="btn-save" class="green">Save & Start Studying</button>
-    <button class="btn-rst red">Start Over</button>
+    <h1>Review & Save</h1>
+    <input id="d-name" placeholder="Name this deck (e.g., Biology Ch. 1)" style="font-weight:700; text-align:center; font-size:1.1rem; color:var(--p)">
+    <div id="rev-list" style="max-height:300px; overflow-y:auto; display:flex; flex-direction:column; gap:8px; padding:2px"></div>
+    <div class="flex"><button id="btn-add" class="gray">Add Blank Row</button></div>
+    <button id="btn-save" class="green">Save Deck to Library</button>
+    <button class="btn-rst red">Cancel</button>
   </div>
 
   <div id="v-card" class="box view">
-    <h1>Flashcards</h1><h3 id="c-count" style="color:#6B7280"></h3>
+    <h1 id="active-title">Flashcards</h1><h3 id="c-count" style="color:#A1A1AA; font-size:0.95rem;"></h3>
     <div class="scene"><div id="card" class="card">
       <div id="c-front" class="face"></div><div id="c-back" class="face back"></div>
     </div></div>
     <div class="flex"><button id="btn-p">Previous</button><button id="btn-n">Next</button></div>
     <button id="btn-q" class="green">Test Me (Quiz Mode)</button>
-    <div class="flex"><button class="btn-rev gray">Edit Cards</button><button class="btn-rst red">Start Over</button></div>
+    <div class="flex"><button class="btn-rev gray">Edit Cards</button><button class="btn-rst red">Back to Library</button></div>
   </div>
 
   <div id="v-quiz" class="box view">
-    <h1>Quiz Time</h1><h3 id="q-count" style="color:#6B7280"></h3>
-    <h2 id="q-word" style="color:var(--p); font-size:2.2rem; margin:1rem 0"></h2>
+    <h1>Quiz Time</h1><h3 id="q-count" style="color:#A1A1AA; font-size:0.95rem;"></h3>
+    <h2 id="q-word" style="color:var(--p); font-size:2rem; margin:1rem 0; font-weight:700; text-align:center;"></h2>
     <div id="q-opts" style="display:flex; flex-direction:column; gap:10px;"></div>
     <div id="q-res" style="display:none; margin: 1rem 0;">
-      <h2 id="q-score" style="font-size:2.5rem"></h2><p>Great job!</p>
-      <button id="btn-miss" class="red" style="display:none; margin-top:10px;">Study Missed Words</button>
-      <button id="btn-rq" class="green" style="margin-top:10px;">Play Quiz Again</button>
+      <h2 id="q-score" style="font-size:3.5rem; color:var(--hdg); text-align:center;"></h2><p style="font-size:1.1rem; text-align:center; color:var(--txt)">Great job!</p>
+      <button id="btn-miss" class="red" style="display:none; margin-top:15px;">Study Missed Words</button>
+      <button id="btn-rq" class="green" style="margin-top:15px;">Play Quiz Again</button>
     </div>
-    <div class="flex" style="margin-top:10px"><button class="btn-c" style="background:var(--p)">Back to Flashcards</button><button class="btn-rst red">Start Over</button></div>
+    <div class="flex" style="margin-top:10px"><button class="btn-c" style="background:var(--p)">Back to Flashcards</button><button class="btn-rst red">Library</button></div>
   </div>
 
 <script>
   const $ = s => document.querySelector(s), $$ = s => document.querySelectorAll(s);
   let deck = [], quiz = [], qI = 0, cI = 0, score = 0, missed = [];
+  let lib = JSON.parse(localStorage.getItem('studyLib')) || {};
 
+  // -- SOUND ENGINE (Synthesizes a deep, pine wood clack) --
+  let actx;
+  const playClack = () => {
+    if (!actx) actx = new (window.AudioContext || window.webkitAudioContext)();
+    if (actx.state === 'suspended') actx.resume();
+    let osc = actx.createOscillator(), g = actx.createGain();
+    
+    // Optional: Add a lowpass filter to remove harshness and mimic soft wood
+    let filter = actx.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.frequency.value = 1000; 
+
+    osc.connect(filter); filter.connect(g); g.connect(actx.destination);
+    
+    // Triangle wave, starting much lower and dropping to a deep bass frequency
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(320, actx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(45, actx.currentTime + 0.09);
+    
+    // Volume envelope: sharp attack, slightly longer decay for deeper resonance
+    g.gain.setValueAtTime(0.5, actx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, actx.currentTime + 0.09);
+    
+    osc.start(); osc.stop(actx.currentTime + 0.09);
+  };
+
+  // Attach sound to all buttons and the flashcard
+  document.addEventListener('click', e => {
+    if (e.target.closest('button') || e.target.closest('.card')) {
+      // Small timeout ensures UI updates slightly before the sound plays, feeling more natural
+      setTimeout(playClack, 10);
+    }
+  });
+
+  // -- CORE LOGIC --
   const view = id => $$('.view').forEach(v => v.classList.toggle('active', v.id === id));
-  const save = () => localStorage.setItem('myDeck', JSON.stringify(deck));
+  const saveLib = () => localStorage.setItem('studyLib', JSON.stringify(lib));
   
-  // Init & Setup
-  if(localStorage.myDeck && JSON.parse(localStorage.myDeck).length) { deck = JSON.parse(localStorage.myDeck); $('#btn-resume').style.display = 'block'; }
-  $('#btn-resume').onclick = () => showCard();
+  // Library Management
+  const renderLib = () => {
+    let keys = Object.keys(lib);
+    $('#deck-list').innerHTML = keys.length ? keys.map(k => `
+      <div class="flex" style="align-items:center;">
+        <button class="opt" style="flex:1; padding:1.2rem 1rem; border:2px solid transparent; background:var(--border);" onclick="loadDeck('${k}')">
+          <span style="font-weight:700; font-size:1.05rem;">${k}</span> <span style="color:#71717A; font-size:0.9rem; margin-left:5px;">(${lib[k].length} cards)</span>
+        </button>
+        <button class="del-btn" style="padding:1.2rem" onclick="delDeck('${k}')">X</button>
+      </div>`).join('') : '<p style="color:#A1A1AA; margin:0; text-align:center; font-style:italic;">No saved decks yet.</p>';
+  };
+  const loadDeck = (name) => { deck = [...lib[name]]; $('#d-name').value = name; showCard(); };
+  const delDeck = (name) => { 
+    // Prevents the clack from playing twice since the browser 'confirm' interrupts it
+    if(confirm(`Delete the deck "${name}"?`)) { delete lib[name]; saveLib(); renderLib(); } 
+  };
+  
+  renderLib();
 
+  // Fetching
   $('#btn-fetch').onclick = async () => {
     let ws = [...new Set($('#words').value.split(/,|\n/).map(w => w.trim()).filter(w => w))];
-    if(!ws.length) return alert('Enter words');
-    $('#btn-fetch').disabled = true; $('#msg').innerText = 'Fetching...'; deck = [];
+    if(!ws.length) return alert('Enter some words first!');
+    $('#btn-fetch').disabled = true; $('#msg').innerText = 'Fetching definitions...'; deck = [];
+    $('#d-name').value = ''; 
+    
     for(let w of ws) {
       try { let r = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${w}`), d = await r.json();
         deck.push({ w, d: r.ok ? d[0].meanings[0].definitions[0].definition : 'Not found' });
@@ -95,18 +169,19 @@
     $('#btn-fetch').disabled = false; $('#msg').innerText = ''; showRev();
   };
 
-  // Review
+  // Review & Save
   const showRev = () => { view('v-rev'); renderRev(); };
   const renderRev = () => $('#rev-list').innerHTML = deck.map((c,i) => `<div class="rev-row"><input class="w" value="${c.w}"><input class="d" value="${c.d}"><button class="del-btn" onclick="deck.splice(${i},1);renderRev()">X</button></div>`).join('');
   $('#btn-add').onclick = () => { deck.push({w:'',d:''}); renderRev(); $('#rev-list').scrollTop = 9999; };
   $('#btn-save').onclick = () => {
     deck = [...$$('.rev-row')].map(r => ({ w: r.querySelector('.w').value.trim(), d: r.querySelector('.d').value.trim() })).filter(c => c.w && c.d);
-    if(!deck.length) return alert('Need 1 valid word');
-    save(); showCard();
+    if(!deck.length) return alert('You need at least 1 valid word.');
+    let name = $('#d-name').value.trim() || `Deck ${Object.keys(lib).length + 1}`;
+    $('#d-name').value = name; lib[name] = deck; saveLib(); renderLib(); showCard();
   };
 
-  // Card
-  const showCard = () => { view('v-card'); cI = 0; updateCard(); };
+  // Flashcards
+  const showCard = () => { view('v-card'); cI = 0; $('#active-title').innerText = $('#d-name').value || 'Flashcards'; updateCard(); };
   const updateCard = () => {
     $('#card').classList.remove('flip');
     setTimeout(() => {
@@ -121,7 +196,7 @@
 
   // Quiz
   const showQuiz = () => {
-    if(deck.length < 2) return alert('Need 2+ words for quiz');
+    if(deck.length < 2) return alert('You need at least 2 words to take a quiz.');
     view('v-quiz'); $('#q-opts').style.display = 'flex'; $('#q-res').style.display = 'none';
     quiz = [...deck].sort(() => Math.random() - .5); qI = score = 0; missed = []; loadQ();
   };
@@ -143,11 +218,11 @@
   };
 
   // Global Controls
-  $$('.btn-rst').forEach(b => b.onclick = () => { view('v-setup'); $('#words').value = ''; deck = []; save(); $('#btn-resume').style.display = 'none'; });
+  $$('.btn-rst').forEach(b => b.onclick = () => { view('v-setup'); $('#words').value = ''; renderLib(); });
   $$('.btn-rev').forEach(b => b.onclick = showRev);
   $$('.btn-c').forEach(b => b.onclick = showCard);
   $('#btn-q').onclick = $('#btn-rq').onclick = showQuiz;
-  $('#btn-miss').onclick = () => { deck = [...missed]; save(); showCard(); };
+  $('#btn-miss').onclick = () => { deck = [...missed]; $('#d-name').value = 'Missed Words'; showCard(); };
 </script>
 </body>
 </html>
