@@ -1,639 +1,153 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flashcard & Quiz Generator</title>
-    <style>
-        :root {
-            --primary: #4F46E5;
-            --bg: #F3F4F6;
-            --text: #1F2937;
-            --card-bg: #FFFFFF;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 2rem;
-            margin: 0;
-            min-height: 100vh;
-        }
-
-        .container {
-            width: 100%;
-            max-width: 600px;
-            background: var(--card-bg);
-            padding: 2rem;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            margin-bottom: 2rem;
-        }
-
-        h1 {
-            text-align: center;
-            margin-top: 0;
-        }
-
-        .input-group {
-            margin-bottom: 1.5rem;
-            display: flex;
-            flex-direction: column;
-        }
-
-        label {
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-            font-size: 1rem;
-        }
-
-        textarea, input[type="text"] {
-            width: 100%;
-            padding: 0.75rem;
-            border: 1px solid #D1D5DB;
-            border-radius: 6px;
-            font-family: inherit;
-            box-sizing: border-box;
-            font-size: 1.1rem;
-        }
-
-        textarea {
-            resize: vertical;
-            min-height: 100px;
-        }
-
-        button {
-            background-color: var(--primary);
-            color: white;
-            border: none;
-            padding: 1rem 1.5rem;
-            border-radius: 6px;
-            font-size: 1.15rem;
-            font-weight: 600;
-            cursor: pointer;
-            width: 100%;
-            transition: background-color 0.2s;
-            margin-bottom: 0.5rem;
-        }
-
-        button:hover {
-            background-color: #4338CA;
-        }
-
-        button:disabled {
-            background-color: #9CA3AF;
-            cursor: not-allowed;
-        }
-
-        /* Generic shared UI */
-        .controls {
-            display: flex;
-            justify-content: space-between;
-            width: 100%;
-            gap: 10px;
-            margin-bottom: 0.5rem;
-        }
-
-        .controls button {
-            flex: 1;
-            margin-bottom: 0;
-        }
-
-        #status {
-            text-align: center;
-            margin-top: 1rem;
-            font-weight: 600;
-            color: #4B5563;
-        }
-        
-        .counter {
-            text-align: center;
-            margin-bottom: 1rem;
-            font-weight: 600;
-            color: #6B7280;
-            font-size: 1.1rem;
-        }
-
-        /* Review & Edit Area */
-        #review-area {
-            display: none;
-            flex-direction: column;
-        }
-
-        #review-list {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin-bottom: 1.5rem;
-            max-height: 400px;
-            overflow-y: auto;
-            padding-right: 5px;
-        }
-
-        .review-item {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-
-        .review-item input.rev-word {
-            flex: 1;
-        }
-
-        .review-item input.rev-def {
-            flex: 2;
-        }
-
-        .review-item button.del-btn {
-            flex: 0;
-            width: auto;
-            padding: 0.75rem 1rem;
-            background-color: #EF4444;
-            margin-bottom: 0;
-        }
-
-        .review-item button.del-btn:hover {
-            background-color: #DC2626;
-        }
-
-        /* Flashcard Area */
-        #flashcard-area {
-            display: none;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .scene {
-            width: 100%;
-            height: 250px;
-            perspective: 600px;
-            margin-bottom: 1.5rem;
-        }
-
-        .card {
-            width: 100%;
-            height: 100%;
-            position: relative;
-            transition: transform 0.6s;
-            transform-style: preserve-3d;
-            cursor: pointer;
-        }
-
-        .card.is-flipped {
-            transform: rotateX(180deg);
-        }
-
-        .card-face {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            backface-visibility: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 2rem;
-            box-sizing: border-box;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            text-align: center;
-            font-size: 1.25rem;
-        }
-
-        .card-front {
-            background-color: #FFFFFF;
-            border: 2px solid var(--primary);
-            font-weight: bold;
-            font-size: 2rem;
-        }
-
-        .card-back {
-            background-color: var(--primary);
-            color: white;
-            transform: rotateX(180deg);
-            overflow-y: auto;
-            font-size: 1.4rem;
-        }
-
-        /* Quiz Area */
-        #quiz-area {
-            display: none;
-            flex-direction: column;
-        }
-
-        #quiz-word {
-            font-size: 2.2rem;
-            font-weight: bold;
-            text-align: center;
-            margin-bottom: 1.5rem;
-            color: var(--primary);
-        }
-
-        .quiz-options {
-            display: flex;
-            flex-direction: column;
-            gap: 0.75rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .quiz-btn {
-            background-color: #E5E7EB;
-            color: var(--text);
-            padding: 1.2rem;
-            font-size: 1.15rem;
-            font-weight: 500;
-            text-align: left;
-            border: 2px solid transparent;
-            transition: all 0.2s;
-            margin-bottom: 0;
-        }
-
-        .quiz-btn:hover:not(:disabled) {
-            background-color: #D1D5DB;
-        }
-
-        .quiz-btn.correct {
-            background-color: #10B981 !important;
-            color: white;
-            border-color: #059669;
-        }
-
-        .quiz-btn.wrong {
-            background-color: #EF4444 !important;
-            color: white;
-            border-color: #B91C1C;
-        }
-
-        #quiz-results {
-            display: none;
-            text-align: center;
-        }
-
-        #quiz-results h2 {
-            font-size: 2.5rem;
-            margin-bottom: 0.5rem;
-        }
-    </style>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Study App</title>
+<style>
+  :root { --p: #4F46E5; --bg: #F3F4F6; --txt: #1F2937; --cbg: #FFF; }
+  body { font-family: system-ui, sans-serif; background: var(--bg); color: var(--txt); display: flex; flex-direction: column; align-items: center; padding: 2rem; margin: 0; min-height: 100vh; }
+  .box { width: 100%; max-width: 600px; background: var(--cbg); padding: 2rem; border-radius: 12px; box-shadow: 0 4px 6px #0002; box-sizing: border-box; }
+  .view { display: none; flex-direction: column; gap: 1rem; text-align: center; }
+  .active { display: flex; }
+  input, textarea { width: 100%; padding: .75rem; border: 1px solid #D1D5DB; border-radius: 6px; font: inherit; box-sizing: border-box; }
+  button { background: var(--p); color: #FFF; border: none; padding: 1rem; border-radius: 6px; font-size: 1.15rem; font-weight: 600; cursor: pointer; transition: .2s; width: 100%; }
+  button:hover { filter: brightness(1.1); }
+  button:disabled { background: #9CA3AF; cursor: not-allowed; }
+  .flex { display: flex; gap: 10px; }
+  .green { background: #10B981 !important; } .red { background: #EF4444 !important; } .gray { background: #6B7280 !important; }
+  h1, h2, h3 { margin: 0; }
+  
+  /* Cards */
+  .scene { height: 250px; perspective: 600px; width: 100%; margin: 10px 0; }
+  .card { width: 100%; height: 100%; position: relative; transition: transform .6s; transform-style: preserve-3d; cursor: pointer; }
+  .card.flip { transform: rotateX(180deg); }
+  .face { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; display: flex; align-items: center; justify-content: center; padding: 2rem; box-sizing: border-box; border-radius: 12px; box-shadow: 0 4px 6px #0002; font-size: 1.5rem; overflow-y: auto; background: var(--cbg); border: 2px solid var(--p); font-weight: bold; }
+  .back { background: var(--p); color: #FFF; transform: rotateX(180deg); font-weight: normal; font-size: 1.3rem; }
+  
+  /* Quiz & Review */
+  .opt { background: #E5E7EB; color: var(--txt); text-align: left; border: 2px solid transparent; }
+  .opt:hover:not(:disabled) { background: #D1D5DB; }
+  .opt.c { background: #10B981 !important; color: #FFF; border-color: #059669; } 
+  .opt.w { background: #EF4444 !important; color: #FFF; border-color: #B91C1C; }
+  .rev-row { display: flex; gap: 10px; }
+  .del-btn { width: auto; padding: .75rem 1rem; background: #EF4444; }
+</style>
 </head>
 <body>
 
-    <div class="container" id="setup-area">
-        <h1>Study App Generator</h1>
-        
-        <div class="input-group">
-            <label for="word-list">Words to learn (comma separated or new lines)</label>
-            <textarea id="word-list" placeholder="e.g. Obfuscate, Ephemeral, Sycophant"></textarea>
-        </div>
+  <div id="v-setup" class="box view active">
+    <h1>Study App</h1>
+    <textarea id="words" placeholder="Words to learn (comma or newline separated)" rows="4"></textarea>
+    <button id="btn-fetch">Fetch Definitions</button>
+    <button id="btn-resume" class="green" style="display:none">Resume Saved Deck</button>
+    <div id="msg" style="font-weight:600; color:#4B5563"></div>
+  </div>
 
-        <button id="generate-btn">Fetch Definitions</button>
-        <div id="status"></div>
+  <div id="v-rev" class="box view">
+    <h1>Review & Edit</h1>
+    <div id="rev-list" style="max-height:350px; overflow-y:auto; display:flex; flex-direction:column; gap:10px; padding:2px"></div>
+    <button id="btn-add" class="gray">Add Blank Row</button>
+    <button id="btn-save" class="green">Save & Start Studying</button>
+    <button class="btn-rst red">Start Over</button>
+  </div>
+
+  <div id="v-card" class="box view">
+    <h1>Flashcards</h1><h3 id="c-count" style="color:#6B7280"></h3>
+    <div class="scene"><div id="card" class="card">
+      <div id="c-front" class="face"></div><div id="c-back" class="face back"></div>
+    </div></div>
+    <div class="flex"><button id="btn-p">Previous</button><button id="btn-n">Next</button></div>
+    <button id="btn-q" class="green">Test Me (Quiz Mode)</button>
+    <div class="flex"><button class="btn-rev gray">Edit Cards</button><button class="btn-rst red">Start Over</button></div>
+  </div>
+
+  <div id="v-quiz" class="box view">
+    <h1>Quiz Time</h1><h3 id="q-count" style="color:#6B7280"></h3>
+    <h2 id="q-word" style="color:var(--p); font-size:2.2rem; margin:1rem 0"></h2>
+    <div id="q-opts" style="display:flex; flex-direction:column; gap:10px;"></div>
+    <div id="q-res" style="display:none; margin: 1rem 0;">
+      <h2 id="q-score" style="font-size:2.5rem"></h2><p>Great job!</p>
+      <button id="btn-miss" class="red" style="display:none; margin-top:10px;">Study Missed Words</button>
+      <button id="btn-rq" class="green" style="margin-top:10px;">Play Quiz Again</button>
     </div>
+    <div class="flex" style="margin-top:10px"><button class="btn-c" style="background:var(--p)">Back to Flashcards</button><button class="btn-rst red">Start Over</button></div>
+  </div>
 
-    <div class="container" id="review-area">
-        <h1>Review & Edit</h1>
-        <div class="counter">Fix missing definitions or add new words</div>
-        
-        <div id="review-list">
-            </div>
+<script>
+  const $ = s => document.querySelector(s), $$ = s => document.querySelectorAll(s);
+  let deck = [], quiz = [], qI = 0, cI = 0, score = 0, missed = [];
 
-        <button id="add-row-btn" style="background-color: #6B7280;">Add Blank Row</button>
-        <button id="start-study-btn" style="background-color: #10B981; margin-top: 1rem;">Save & Start Studying</button>
-        <button class="reset-btn" style="background-color: #EF4444; margin-top: 10px;">Start Over</button>
-    </div>
+  const view = id => $$('.view').forEach(v => v.classList.toggle('active', v.id === id));
+  const save = () => localStorage.setItem('myDeck', JSON.stringify(deck));
+  
+  // Init & Setup
+  if(localStorage.myDeck && JSON.parse(localStorage.myDeck).length) { deck = JSON.parse(localStorage.myDeck); $('#btn-resume').style.display = 'block'; }
+  $('#btn-resume').onclick = () => showCard();
 
-    <div class="container" id="flashcard-area">
-        <h1>Flashcards</h1>
-        <div class="counter" id="card-counter">Card 1 of X</div>
-        
-        <div class="scene">
-            <div class="card" id="flashcard">
-                <div class="card-face card-front" id="card-front">Word</div>
-                <div class="card-face card-back" id="card-back">Definition</div>
-            </div>
-        </div>
+  $('#btn-fetch').onclick = async () => {
+    let ws = [...new Set($('#words').value.split(/,|\n/).map(w => w.trim()).filter(w => w))];
+    if(!ws.length) return alert('Enter words');
+    $('#btn-fetch').disabled = true; $('#msg').innerText = 'Fetching...'; deck = [];
+    for(let w of ws) {
+      try { let r = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${w}`), d = await r.json();
+        deck.push({ w, d: r.ok ? d[0].meanings[0].definitions[0].definition : 'Not found' });
+      } catch { deck.push({ w, d: 'Error' }); }
+    }
+    $('#btn-fetch').disabled = false; $('#msg').innerText = ''; showRev();
+  };
 
-        <div class="controls">
-            <button id="prev-btn">Previous</button>
-            <button id="next-btn">Next</button>
-        </div>
-        <button id="go-to-quiz-btn" style="background-color: #10B981; margin-top: 10px;">Test Me (Quiz Mode)</button>
-        <button id="back-to-review-btn" style="background-color: #6B7280; margin-top: 10px;">Edit Cards</button>
-        <button class="reset-btn" style="background-color: #EF4444; margin-top: 10px;">Start Over</button>
-    </div>
+  // Review
+  const showRev = () => { view('v-rev'); renderRev(); };
+  const renderRev = () => $('#rev-list').innerHTML = deck.map((c,i) => `<div class="rev-row"><input class="w" value="${c.w}"><input class="d" value="${c.d}"><button class="del-btn" onclick="deck.splice(${i},1);renderRev()">X</button></div>`).join('');
+  $('#btn-add').onclick = () => { deck.push({w:'',d:''}); renderRev(); $('#rev-list').scrollTop = 9999; };
+  $('#btn-save').onclick = () => {
+    deck = [...$$('.rev-row')].map(r => ({ w: r.querySelector('.w').value.trim(), d: r.querySelector('.d').value.trim() })).filter(c => c.w && c.d);
+    if(!deck.length) return alert('Need 1 valid word');
+    save(); showCard();
+  };
 
-    <div class="container" id="quiz-area">
-        <h1>Quiz Time</h1>
-        <div id="quiz-gameplay">
-            <div class="counter" id="quiz-counter">Question 1 of X</div>
-            <div id="quiz-word">Word</div>
-            
-            <div class="quiz-options" id="quiz-options">
-                </div>
-        </div>
+  // Card
+  const showCard = () => { view('v-card'); cI = 0; updateCard(); };
+  const updateCard = () => {
+    $('#card').classList.remove('flip');
+    setTimeout(() => {
+      $('#c-front').innerText = deck[cI].w; $('#c-back').innerText = deck[cI].d;
+      $('#c-count').innerText = `Card ${cI+1} of ${deck.length}`;
+      $('#btn-p').disabled = cI === 0; $('#btn-n').disabled = cI === deck.length - 1;
+    }, 150);
+  };
+  $('#card').onclick = () => $('#card').classList.toggle('flip');
+  $('#btn-p').onclick = () => { if(cI > 0) { cI--; updateCard(); } };
+  $('#btn-n').onclick = () => { if(cI < deck.length-1) { cI++; updateCard(); } };
 
-        <div id="quiz-results">
-            <h2>Score: <span id="final-score">0</span></h2>
-            <p>Great job!</p>
-            <br>
-            <button id="restart-quiz-btn" style="margin-bottom: 10px;">Play Quiz Again</button>
-        </div>
+  // Quiz
+  const showQuiz = () => {
+    if(deck.length < 2) return alert('Need 2+ words for quiz');
+    view('v-quiz'); $('#q-opts').style.display = 'flex'; $('#q-res').style.display = 'none';
+    quiz = [...deck].sort(() => Math.random() - .5); qI = score = 0; missed = []; loadQ();
+  };
+  const loadQ = () => {
+    let q = quiz[qI], opts = [q.d, ...deck.filter(c => c.w !== q.w).sort(() => Math.random() - .5).slice(0,3).map(c => c.d)].sort(() => Math.random() - .5);
+    $('#q-count').innerText = `Question ${qI+1} of ${quiz.length}`; $('#q-word').innerText = q.w;
+    $('#q-opts').innerHTML = '';
+    opts.forEach(o => {
+      let b = document.createElement('button'); b.className = 'opt'; b.innerText = o;
+      b.onclick = () => {
+        $$('.opt').forEach(x => { x.disabled = true; if(x.innerText === q.d) x.classList.add('c'); });
+        if(o === q.d) score++; else { b.classList.add('w'); if(!missed.some(m => m.w === q.w)) missed.push(q); }
+        setTimeout(() => {
+          if(++qI < quiz.length) loadQ();
+          else { $('#q-opts').style.display = 'none'; $('#q-res').style.display = 'block'; $('#q-score').innerText = `${score} / ${quiz.length}`; $('#btn-miss').style.display = missed.length ? 'block' : 'none'; }
+        }, 1500);
+      }; $('#q-opts').appendChild(b);
+    });
+  };
 
-        <button id="back-to-flashcards-btn" style="background-color: #4F46E5; margin-top: 10px;">Back to Flashcards</button>
-        <button class="reset-btn" style="background-color: #EF4444; margin-top: 10px;">Start Over</button>
-    </div>
-
-    <script>
-        // Global State
-        let flashcards = [];
-        let currentIndex = 0;
-        
-        // Quiz State
-        let quizQuestions = [];
-        let currentQuizIndex = 0;
-        let score = 0;
-
-        // View Containers
-        const setupArea = document.getElementById('setup-area');
-        const reviewArea = document.getElementById('review-area');
-        const flashcardArea = document.getElementById('flashcard-area');
-        const quizArea = document.getElementById('quiz-area');
-        
-        const statusDiv = document.getElementById('status');
-        const generateBtn = document.getElementById('generate-btn');
-
-        // Setup & Fetch Logic
-        generateBtn.addEventListener('click', async () => {
-            const rawWords = document.getElementById('word-list').value.trim();
-
-            if (!rawWords) return alert('Please enter some words.');
-
-            const words = [...new Set(rawWords.split(/,|\n/).map(w => w.trim()).filter(w => w.length > 0))];
-            if (words.length === 0) return alert('No valid words found.');
-
-            generateBtn.disabled = true;
-            statusDiv.textContent = 'Fetching definitions... Please wait.';
-            flashcards = [];
-
-            try {
-                for (const word of words) {
-                    try {
-                        const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
-                        if (response.ok) {
-                            const data = await response.json();
-                            const definition = data[0].meanings[0].definitions[0].definition;
-                            flashcards.push({ word: word, definition: definition });
-                        } else {
-                            flashcards.push({ word: word, definition: "Definition not found." });
-                        }
-                    } catch (err) {
-                        flashcards.push({ word: word, definition: "Error fetching definition." });
-                    }
-                }
-                
-                if (flashcards.length > 0) {
-                    startReviewMode();
-                } else {
-                    throw new Error('Could not fetch any definitions.');
-                }
-
-            } catch (error) {
-                console.error(error);
-                statusDiv.textContent = 'Error: Could not generate data.';
-                generateBtn.disabled = false;
-            }
-        });
-
-        // -----------------------
-        // NAVIGATION LOGIC
-        // -----------------------
-        function hideAllViews() {
-            setupArea.style.display = 'none';
-            reviewArea.style.display = 'none';
-            flashcardArea.style.display = 'none';
-            quizArea.style.display = 'none';
-        }
-
-        // -----------------------
-        // REVIEW & EDIT LOGIC
-        // -----------------------
-        const reviewList = document.getElementById('review-list');
-        const addRowBtn = document.getElementById('add-row-btn');
-        const startStudyBtn = document.getElementById('start-study-btn');
-        const backToReviewBtn = document.getElementById('back-to-review-btn');
-
-        function startReviewMode() {
-            hideAllViews();
-            reviewArea.style.display = 'flex';
-            reviewList.innerHTML = ''; // Clear old list
-            
-            // Populate list
-            flashcards.forEach(card => {
-                createReviewRow(card.word, card.definition);
-            });
-        }
-
-        function createReviewRow(wordText = '', defText = '') {
-            const row = document.createElement('div');
-            row.className = 'review-item';
-            
-            row.innerHTML = `
-                <input type="text" class="rev-word" value="${wordText}" placeholder="Word">
-                <input type="text" class="rev-def" value="${defText}" placeholder="Definition">
-                <button class="del-btn">X</button>
-            `;
-            
-            row.querySelector('.del-btn').addEventListener('click', () => {
-                row.remove();
-            });
-
-            reviewList.appendChild(row);
-        }
-
-        addRowBtn.addEventListener('click', () => {
-            createReviewRow('', '');
-            // Scroll to bottom
-            reviewList.scrollTop = reviewList.scrollHeight;
-        });
-
-        startStudyBtn.addEventListener('click', () => {
-            // Re-build the flashcards array from the current inputs
-            flashcards = [];
-            const rows = document.querySelectorAll('.review-item');
-            
-            rows.forEach(row => {
-                const w = row.querySelector('.rev-word').value.trim();
-                const d = row.querySelector('.rev-def').value.trim();
-                
-                if (w && d) {
-                    flashcards.push({ word: w, definition: d });
-                }
-            });
-
-            if (flashcards.length === 0) {
-                alert("Please have at least one valid word and definition before studying.");
-                return;
-            }
-
-            startFlashcardMode();
-        });
-
-        backToReviewBtn.addEventListener('click', startReviewMode);
-
-        // -----------------------
-        // FLASHCARD LOGIC
-        // -----------------------
-        const cardElement = document.getElementById('flashcard');
-        const cardFront = document.getElementById('card-front');
-        const cardBack = document.getElementById('card-back');
-        const prevBtn = document.getElementById('prev-btn');
-        const nextBtn = document.getElementById('next-btn');
-        const cardCounter = document.getElementById('card-counter');
-
-        function startFlashcardMode() {
-            hideAllViews();
-            flashcardArea.style.display = 'flex';
-            currentIndex = 0;
-            updateCardUI();
-        }
-
-        function updateCardUI() {
-            cardElement.classList.remove('is-flipped');
-            setTimeout(() => {
-                cardFront.textContent = flashcards[currentIndex].word;
-                cardBack.textContent = flashcards[currentIndex].definition;
-                cardCounter.textContent = `Card ${currentIndex + 1} of ${flashcards.length}`;
-                
-                prevBtn.disabled = currentIndex === 0;
-                nextBtn.disabled = currentIndex === flashcards.length - 1;
-            }, 150);
-        }
-
-        cardElement.addEventListener('click', () => cardElement.classList.toggle('is-flipped'));
-
-        nextBtn.addEventListener('click', () => {
-            if (currentIndex < flashcards.length - 1) {
-                currentIndex++;
-                updateCardUI();
-            }
-        });
-
-        prevBtn.addEventListener('click', () => {
-            if (currentIndex > 0) {
-                currentIndex--;
-                updateCardUI();
-            }
-        });
-
-        // -----------------------
-        // QUIZ LOGIC
-        // -----------------------
-        const quizWordEl = document.getElementById('quiz-word');
-        const quizOptionsContainer = document.getElementById('quiz-options');
-        const quizCounterEl = document.getElementById('quiz-counter');
-        const quizGameplay = document.getElementById('quiz-gameplay');
-        const quizResults = document.getElementById('quiz-results');
-        const finalScoreEl = document.getElementById('final-score');
-
-        document.getElementById('go-to-quiz-btn').addEventListener('click', () => {
-            if (flashcards.length < 2) {
-                alert("You need at least 2 words to play the multiple-choice quiz!");
-                return;
-            }
-            startQuizMode();
-        });
-
-        document.getElementById('restart-quiz-btn').addEventListener('click', startQuizMode);
-        document.getElementById('back-to-flashcards-btn').addEventListener('click', startFlashcardMode);
-
-        function startQuizMode() {
-            hideAllViews();
-            quizArea.style.display = 'flex';
-            quizGameplay.style.display = 'block';
-            quizResults.style.display = 'none';
-            
-            quizQuestions = [...flashcards].sort(() => Math.random() - 0.5);
-            currentQuizIndex = 0;
-            score = 0;
-            
-            loadQuizQuestion();
-        }
-
-        function loadQuizQuestion() {
-            const currentItem = quizQuestions[currentQuizIndex];
-            quizCounterEl.textContent = `Question ${currentQuizIndex + 1} of ${quizQuestions.length}`;
-            quizWordEl.textContent = currentItem.word;
-            
-            quizOptionsContainer.innerHTML = '';
-
-            let options = [currentItem.definition];
-            
-            let otherCards = flashcards.filter(c => c.word !== currentItem.word);
-            otherCards.sort(() => Math.random() - 0.5); 
-            
-            for(let i = 0; i < Math.min(3, otherCards.length); i++) {
-                options.push(otherCards[i].definition);
-            }
-
-            options.sort(() => Math.random() - 0.5);
-
-            options.forEach(optText => {
-                const btn = document.createElement('button');
-                btn.classList.add('quiz-btn');
-                btn.textContent = optText;
-                
-                btn.addEventListener('click', () => handleQuizAnswer(btn, optText, currentItem.definition));
-                quizOptionsContainer.appendChild(btn);
-            });
-        }
-
-        function handleQuizAnswer(btnElement, selectedDef, correctDef) {
-            const allBtns = quizOptionsContainer.querySelectorAll('.quiz-btn');
-            allBtns.forEach(b => b.disabled = true);
-
-            if (selectedDef === correctDef) {
-                btnElement.classList.add('correct');
-                score++;
-            } else {
-                btnElement.classList.add('wrong');
-                allBtns.forEach(b => {
-                    if (b.textContent === correctDef) {
-                        b.classList.add('correct');
-                    }
-                });
-            }
-
-            setTimeout(() => {
-                currentQuizIndex++;
-                if (currentQuizIndex < quizQuestions.length) {
-                    loadQuizQuestion();
-                } else {
-                    showQuizResults();
-                }
-            }, 1500);
-        }
-
-        function showQuizResults() {
-            quizGameplay.style.display = 'none';
-            quizResults.style.display = 'block';
-            finalScoreEl.textContent = `${score} / ${quizQuestions.length}`;
-        }
-
-        // -----------------------
-        // GLOBAL RESET
-        // -----------------------
-        document.querySelectorAll('.reset-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                hideAllViews();
-                setupArea.style.display = 'block';
-                statusDiv.textContent = '';
-                generateBtn.disabled = false;
-                document.getElementById('word-list').value = '';
-                flashcards = [];
-            });
-        });
-    </script>
+  // Global Controls
+  $$('.btn-rst').forEach(b => b.onclick = () => { view('v-setup'); $('#words').value = ''; deck = []; save(); $('#btn-resume').style.display = 'none'; });
+  $$('.btn-rev').forEach(b => b.onclick = showRev);
+  $$('.btn-c').forEach(b => b.onclick = showCard);
+  $('#btn-q').onclick = $('#btn-rq').onclick = showQuiz;
+  $('#btn-miss').onclick = () => { deck = [...missed]; save(); showCard(); };
+</script>
 </body>
 </html>
